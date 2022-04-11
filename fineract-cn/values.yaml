@@ -1,6 +1,4 @@
 namespace: "fineract-cn"
-maxSurge: "25%"
-maxUnavailable: "25%"
 accounting:
   image: "apache/fineract-cn-accounting:latest"
 
