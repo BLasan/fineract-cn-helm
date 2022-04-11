@@ -40,9 +40,6 @@ payroll:
 portfolio:
   image: "apache/fineract-cn-portfolio:latest"
 
-postgres:
-  image: "postgresql:9.5"
-
 provisioner:
   image: "apache/fineract-cn-provisioner:latest"
 

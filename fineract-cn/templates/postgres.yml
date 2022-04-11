@@ -1,10 +1,10 @@
 # apiVersion: v1
 # kind: PersistentVolume
 # metadata:
-#   name: cassandra-pv
+#   name: postgresdb-pv
 # spec:
 #   accessModes:
-#     - ReadWriteOnce
+#     - ReadWriteMany
 #   capacity:
 #     storage: 10Gi
 #   persistentVolumeReclaimPolicy: Retain
@@ -13,12 +13,12 @@
 #     fsType: ext4
 #     pdName: apache-fineract-pd
 
-# ---
+---
 
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: cassandra-pvc
+  name: postgresdb-pvc
   namespace: {{ .Values.namespace }}
 spec:
   accessModes:
@@ -26,21 +26,20 @@ spec:
   resources:
     requests:
       storage: 10Gi
-  # volumeName: cassandra-pv
 
 ---
 
 apiVersion: v1
 kind: Service
 metadata:
-  name: cassandra-cluster
+  name: postgresdb-cluster
   namespace: {{ .Values.namespace }}
 spec:
   selector:
-    app: cassandra
+    app: postgresdb
   ports:
-    - port: 9042
-      targetPort: 9042
+  - port: 5432
+    targetPort: 5432
   type: LoadBalancer
 
 ---
@@ -48,13 +47,13 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: cassandra-cluster
+  name: postgresdb-cluster
   namespace: {{ .Values.namespace }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cassandra
+      app: postgresdb
   strategy:
     rollingUpdate:
       maxSurge: 25%
@@ -63,28 +62,32 @@ spec:
   template:
     metadata:
       labels:
-        app: cassandra
+        app: postgresdb
     spec:
       containers:
-        - image: {{ .Values.activemq.image }}
+        - image: postgres:9.5
           imagePullPolicy: IfNotPresent
-          name: cassandra
+          name: postgres
           ports:
-            - containerPort: 9042
-              name: cql
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: postgres
           livenessProbe:
             exec:
               command:
-                - cqlsh
+                - psql
                 - --help
             initialDelaySeconds: 10
             timeoutSeconds: 1
             periodSeconds: 10
             failureThreshold: 3
           volumeMounts:
-            - mountPath: /var/lib/cassandra
-              name: cassandra-storage
+            - mountPath: /var/lib/postgresql
+              name: postgresdb-storage
       volumes:
-        - name: cassandra-storage
+        - name: postgresdb-storage
           persistentVolumeClaim:
-            claimName: cassandra-pvc
+            claimName: postgresdb-pvc
