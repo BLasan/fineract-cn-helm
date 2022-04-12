@@ -48,7 +48,7 @@ spec:
           - name: server.port
             value: "2027"
           - name: spring.application.name
-            value:  deposit-v1
+            value: deposit-v1
           - name: system.publicKey.modulus
             valueFrom:
               configMapKeyRef:

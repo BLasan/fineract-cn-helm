@@ -48,7 +48,7 @@ spec:
           - name: server.port
             value: "2032"
           - name: spring.application.name
-            value:  group-v1
+            value: group-v1
           - name: system.publicKey.modulus
             valueFrom:
               configMapKeyRef:
